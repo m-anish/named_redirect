@@ -93,8 +93,8 @@ def reconfigure_bind9(dns_jail=False):
         return False
 
     try:
-        os.system("sudo cp %(source)s %(destination)s", {'source': dns_jail_zone_file, "destination": dns_jail_zone_file_destination})
-        os.system("sudo cp %(source)s %(destination)s", {'source': bind9_conf_file, "destination": bind9_conf_file_destination})
+        os.system("sudo cp %(source)s %(destination)s" % {'source': dns_jail_zone_file, "destination": dns_jail_zone_file_destination})
+        os.system("sudo cp %(source)s %(destination)s" % {'source': bind9_conf_file, "destination": bind9_conf_file_destination})
     except OSError as err:
         _logger.debug("Could not restart bind9")
         return False
