@@ -57,7 +57,7 @@ def restart_bind9():
     """
     try:
         os.system("sudo systemctl restart bind9.service")
-    except os.OSError as err:
+    except OSError as err:
         _logger.debug("Could not restart bind9")
         return False
     
@@ -95,7 +95,7 @@ def reconfigure_bind9(dns_jail=False):
     try:
         os.system("sudo cp %(source)s %(destination)s", {'source': dns_jail_zone_file, "destination": dns_jail_zone_file_destination})
         os.system("sudo cp %(source)s %(destination)s", {'source': bind9_conf_file, "destination": bind9_conf_file_destination})
-    except os.OSError as err:
+    except OSError as err:
         _logger.debug("Could not restart bind9")
         return False
 
