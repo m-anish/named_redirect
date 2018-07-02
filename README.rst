@@ -2,7 +2,7 @@
 named_redirect
 ==============
 
-.. image:: //readthedocs.org/projects/named-redirect/badge/?version=latest
+.. image:: https//readthedocs.org/projects/named-redirect/badge/?version=latest
 :target: https://named-redirect.readthedocs.io/en/latest/?badge=latest
 :alt: Documentation Status
 
