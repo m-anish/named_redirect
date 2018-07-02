@@ -4,6 +4,10 @@ named_redirect
 
 |docs|
 
+.. |docs| image:: https://readthedocs.org/projects/named-redirect/badge/?version=latest
+:target: https://named-redirect.readthedocs.io/en/latest/?badge=latest
+:alt: Documentation Status
+
 DNS jail for IIAB/bind9 if there is no internet
 
 
