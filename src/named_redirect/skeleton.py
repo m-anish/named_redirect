@@ -40,6 +40,7 @@ def check_internet():
     Returns:
       bool: Whether connected to the internet or not
     """
+    _logger.debug("Checking for internet connectivity")
     try:
         urllib.request.urlopen('http://216.58.192.142', timeout=5)
         _logger.debug("Internet connectivity present!")
@@ -55,10 +56,11 @@ def restart_bind9():
     Returns:
       bool: Whether operation was successful or not
     """
+    _logger.debug("Restarting the named/bind9 systemd service")
     try:
         os.system("sudo systemctl restart bind9.service")
     except OSError as err:
-        _logger.debug("Could not restart bind9")
+        _logger.error("Could not restart bind9")
         return False
     
     _logger.debug("Restarted bind9 service")
@@ -73,7 +75,7 @@ def reconfigure_bind9(dns_jail=False):
     Returns:
       bool: Whether operation was successful or not
     """
-
+    _logger.debug("Reconfiguring named/bind9")
     dns_jail_zone_file=""
     dns_jail_zone_file_destination="/var/named/dns.blackhole"
     bind9_conf_file=""
@@ -81,41 +83,26 @@ def reconfigure_bind9(dns_jail=False):
     
     try:
         if check_internet() == True:
-            _logger.debug("We have internet, so dns_jail is not required")
+            _logger.info("We have internet, so dns_jail is not required")
             dns_jail_zone_file = "/var/named/dns.blackhole.empty"
             bind9_conf_file = "/etc/named-iiab.conf.nojail"
         else:
-            _logger.debug("We do not have internet, so dns_jail is required")
+            _logger.info("We do not have internet, so dns_jail is required")
             dns_jail_zone_file = "/var/named/dns.blackhole.dnsjail"
             bind9_conf_file = "/etc/named-iiab.conf.jail"
     except:
-        _logger.debug("Could not reconfigure bind9")
+        _logger.error("Could not reconfigure bind9")
         return False
 
     try:
         os.system("sudo cp %(source)s %(destination)s" % {'source': dns_jail_zone_file, "destination": dns_jail_zone_file_destination})
         os.system("sudo cp %(source)s %(destination)s" % {'source': bind9_conf_file, "destination": bind9_conf_file_destination})
+        _logger.info("Copied new configuration and zone files")
     except OSError as err:
-        _logger.debug("Could not restart bind9")
+        _logger.error("Could not copy configuration and zone files")
         return False
 
     return restart_bind9()
-
-def fib(n):
-    """Fibonacci example function
-
-    Args:
-      n (int): integer
-
-    Returns:
-      int: n-th Fibonacci number
-    """
-    assert n > 0
-    a, b = 1, 1
-    for i in range(n-1):
-        a, b = b, a+b
-    return a
-
 
 def parse_args(args):
     """Parse command line parameters
@@ -173,7 +160,7 @@ def main(args):
     """
     args = parse_args(args)
     setup_logging(args.loglevel)
-    _logger.debug("Reconfiguring DNS for this machine")
+    _logger.info("Reconfiguring DNS for this machine")
     reconfigure_bind9()
     _logger.info("Script ends here")
 
