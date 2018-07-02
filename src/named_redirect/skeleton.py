@@ -20,7 +20,7 @@ from __future__ import division, print_function, absolute_import
 import argparse
 import sys
 import logging
-import urllib2
+import urllib.request
 import os
 
 from named_redirect import __version__
@@ -41,10 +41,10 @@ def check_internet():
       bool: Whether connected to the internet or not
     """
     try:
-        urllib2.urlopen('http://216.58.192.142', timeout=5)
+        urllib.request.urlopen('http://216.58.192.142', timeout=5)
         _logger.debug("Internet connectivity present!")
         return True
-    except urllib2.URLError as err: 
+    except urllib.error.URLError as err: 
         _logger.debug("Internet connectivity absent!")
         return False
 
