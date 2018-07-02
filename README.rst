@@ -2,18 +2,10 @@
 named_redirect
 ==============
 
-
-Add a short description here!
+DNS jail for IIAB/bind9 if there is no internet
 
 
 Description
 ===========
 
-A longer description of your project goes here...
-
-
-Note
-====
-
-This project has been set up using PyScaffold 3.0.3. For details and usage
-information on PyScaffold see http://pyscaffold.org/.
+This project is supposed to provide a service to the IIAB project wherein a DNS jail is created if no internet presence is detected. For more details, refer to the IIAB project at https://github.com/iiab/iiab

@@ -20,6 +20,8 @@ from __future__ import division, print_function, absolute_import
 import argparse
 import sys
 import logging
+import urllib2
+import os
 
 from named_redirect import __version__
 
@@ -29,6 +31,75 @@ __license__ = "gpl3"
 
 _logger = logging.getLogger(__name__)
 
+
+def check_internet():
+    """Check for internet connectivity
+   
+    Args:
+
+    Returns:
+      bool: Whether connected to the internet or not
+    """
+    try:
+        urllib2.urlopen('http://216.58.192.142', timeout=5)
+        _logger.debug("Internet connectivity present!")
+        return True
+    except urllib2.URLError as err: 
+        _logger.debug("Internet connectivity absent!")
+        return False
+
+
+def restart_bind9():
+    """Restart bind9 named service
+   
+    Returns:
+      bool: Whether operation was successful or not
+    """
+    try:
+        os.system("sudo systemctl restart bind9.service")
+    except os.OSError as err:
+        _logger.debug("Could not restart bind9")
+        return False
+    
+    _logger.debug("Restarted bind9 service")
+    return True
+        
+def reconfigure_bind9(dns_jail=False):
+    """Reconfigure bind9 to serve as a DNS jail or not depending on argument provided. 
+   
+    Args:
+      dns_jail: Whether to reconfigure as a dns jail or not
+
+    Returns:
+      bool: Whether operation was successful or not
+    """
+
+    dns_jail_zone_file=""
+    dns_jail_zone_file_destination="/var/named/dns.blackhole"
+    bind9_conf_file=""
+    bind9_conf_file_destination="/etc/named-iiab.conf"
+    
+    try:
+        if check_internet() == True:
+            _logger.debug("We have internet, so dns_jail is not required")
+            dns_jail_zone_file = "/var/named/dns.blackhole.empty"
+            bind9_conf_file = "/etc/named-iiab.conf.nojail"
+        else:
+            _logger.debug("We do not have internet, so dns_jail is required")
+            dns_jail_zone_file = "/var/named/dns.blackhole.dnsjail"
+            bind9_conf_file = "/etc/named-iiab.conf.jail"
+    except:
+        _logger.debug("Could not reconfigure bind9")
+        return False
+
+    try:
+        os.system("sudo cp %(source)s %(destination)s", {'source': dns_jail_zone_file, "destination": dns_jail_zone_file_destination})
+        os.system("sudo cp %(source)s %(destination)s", {'source': bind9_conf_file, "destination": bind9_conf_file_destination})
+    except os.OSError as err:
+        _logger.debug("Could not restart bind9")
+        return False
+
+    return restart_bind9()
 
 def fib(n):
     """Fibonacci example function
@@ -56,16 +127,16 @@ def parse_args(args):
       :obj:`argparse.Namespace`: command line parameters namespace
     """
     parser = argparse.ArgumentParser(
-        description="Just a Fibonnaci demonstration")
+        description="Check for internet and reconfigure and restart bind9 accordingly")
     parser.add_argument(
         '--version',
         action='version',
         version='named_redirect {ver}'.format(ver=__version__))
-    parser.add_argument(
-        dest="n",
-        help="n-th Fibonacci number",
-        type=int,
-        metavar="INT")
+    #parser.add_argument(
+    #    dest="n",
+    #    help="n-th Fibonacci number",
+    #    type=int,
+    #    metavar="INT")
     parser.add_argument(
         '-v',
         '--verbose',
@@ -102,8 +173,8 @@ def main(args):
     """
     args = parse_args(args)
     setup_logging(args.loglevel)
-    _logger.debug("Starting crazy calculations...")
-    print("The {}-th Fibonacci number is {}".format(args.n, fib(args.n)))
+    _logger.debug("Reconfiguring DNS for this machine")
+    reconfigure_bind9()
     _logger.info("Script ends here")
 
 

@@ -17,6 +17,7 @@ entry_points = """
 # script_name = named_redirect.module:function
 # For example:
 # fibonacci = named_redirect.skeleton:run
+named_redirect = named_redirect.skeleton:run
 """
 
 
