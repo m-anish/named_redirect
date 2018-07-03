@@ -77,18 +77,18 @@ def reconfigure_bind9(dns_jail=False):
     """
     _logger.debug("Reconfiguring named/bind9")
     dns_jail_zone_file=""
-    dns_jail_zone_file_destination="/var/named/dns.blackhole"
+    dns_jail_zone_file_destination="/var/named-iiab/named.blackhole"
     bind9_conf_file=""
     bind9_conf_file_destination="/etc/named-iiab.conf"
     
     try:
         if check_internet() == True:
             _logger.info("We have internet, so dns_jail is not required")
-            dns_jail_zone_file = "/var/named/dns.blackhole.empty"
+            dns_jail_zone_file = "/var/named-iiab/named.blackhole.empty"
             bind9_conf_file = "/etc/named-iiab.conf.nojail"
         else:
             _logger.info("We do not have internet, so dns_jail is required")
-            dns_jail_zone_file = "/var/named/dns.blackhole.dnsjail"
+            dns_jail_zone_file = "/var/named-iiab/named.blackhole.dnsjail"
             bind9_conf_file = "/etc/named-iiab.conf.jail"
     except:
         _logger.error("Could not reconfigure bind9")
