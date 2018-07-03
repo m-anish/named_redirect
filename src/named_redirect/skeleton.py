@@ -72,7 +72,7 @@ def restart_bind9():
     _logger.debug("Restarted bind9 service")
     return True
         
-def reconfigure_bind9(dns_jail_enabled=True):
+def reconfigure_bind9(dns_jail_enabled=False):
     """Reconfigure bind9 to serve as a DNS jail or not depending on argument provided. 
    
     Args:
@@ -88,7 +88,7 @@ def reconfigure_bind9(dns_jail_enabled=True):
     bind9_conf_file_destination="/etc/named-iiab.conf"
     
     try:
-        if check_internet() or not dns_jail_enabled:
+        if check_internet() and not dns_jail_enabled:
             dns_jail_zone_file = "/var/named-iiab/named.blackhole.empty"
             bind9_conf_file = "/etc/named-iiab.conf.nojail"
             _logger.info("DNS jail will not be enabled")
