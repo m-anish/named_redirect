@@ -41,11 +41,19 @@ def check_internet():
       bool: Whether connected to the internet or not
     """
     _logger.debug("Checking for internet connectivity")
+
+    response = 1
     try:
         #urllib.request.urlopen('http://216.58.192.142', timeout=5)
-        return os.system("ping -c 1 8.8.8.8")
+        response = os.system("ping -c 1 8.8.8.8")
+        if response == 0:
+            return True
+            _logger.debug("Internet connectivity present!")
+        else:
+            return False
+            _logger.debug("Internet connectivity absent!")
     except OSError as err: 
-        _logger.debug("Internet connectivity absent!")
+        _logger.error("An error occurred while trying to determine internet connectivity!")
         return False
 
 
@@ -65,7 +73,7 @@ def restart_bind9():
     _logger.debug("Restarted bind9 service")
     return True
         
-def reconfigure_bind9(dns_jail=False):
+def reconfigure_bind9(dns_jail_enabled=False):
     """Reconfigure bind9 to serve as a DNS jail or not depending on argument provided. 
    
     Args:
@@ -81,7 +89,7 @@ def reconfigure_bind9(dns_jail=False):
     bind9_conf_file_destination="/etc/named-iiab.conf"
     
     try:
-        if check_internet() or not dns_jail:
+        if check_internet() or not dns_jail_enabled:
             _logger.info("We have internet, so dns_jail is not required")
             dns_jail_zone_file = "/var/named-iiab/named.blackhole.empty"
             bind9_conf_file = "/etc/named-iiab.conf.nojail"
@@ -121,7 +129,7 @@ def parse_args(args):
     parser.add_argument(
         '-j',
         '--jail',
-        dest="dns_jail",
+        dest="dns_jail_enabled",
         help="1 for enabling dns jail, 0 for disabling dns jail",
         type=int,
         metavar="INT")
@@ -162,7 +170,7 @@ def main(args):
     args = parse_args(args)
     setup_logging(args.loglevel)
     _logger.info("Reconfiguring DNS for this machine")
-    reconfigure_bind9(args.dns_jail)
+    reconfigure_bind9(args.dns_jail_enabled)
     _logger.info("Script ends here")
 
 
