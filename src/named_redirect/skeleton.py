@@ -20,7 +20,7 @@ from __future__ import division, print_function, absolute_import
 import argparse
 import sys
 import logging
-import urllib.request
+#import urllib.request
 import os
 
 from named_redirect import __version__
@@ -42,10 +42,9 @@ def check_internet():
     """
     _logger.debug("Checking for internet connectivity")
     try:
-        urllib.request.urlopen('http://216.58.192.142', timeout=5)
-        _logger.debug("Internet connectivity present!")
-        return True
-    except urllib.error.URLError as err: 
+        #urllib.request.urlopen('http://216.58.192.142', timeout=5)
+        return os.system("ping -c 1 8.8.8.8")
+    except OSError as err: 
         _logger.debug("Internet connectivity absent!")
         return False
 
@@ -82,7 +81,7 @@ def reconfigure_bind9(dns_jail=False):
     bind9_conf_file_destination="/etc/named-iiab.conf"
     
     try:
-        if check_internet() == True:
+        if check_internet() or not dns_jail:
             _logger.info("We have internet, so dns_jail is not required")
             dns_jail_zone_file = "/var/named-iiab/named.blackhole.empty"
             bind9_conf_file = "/etc/named-iiab.conf.nojail"
@@ -119,11 +118,13 @@ def parse_args(args):
         '--version',
         action='version',
         version='named_redirect {ver}'.format(ver=__version__))
-    #parser.add_argument(
-    #    dest="n",
-    #    help="n-th Fibonacci number",
-    #    type=int,
-    #    metavar="INT")
+    parser.add_argument(
+        '-j',
+        '--jail',
+        dest="dns_jail",
+        help="1 for enabling dns jail, 0 for disabling dns jail",
+        type=int,
+        metavar="INT")
     parser.add_argument(
         '-v',
         '--verbose',
@@ -161,7 +162,7 @@ def main(args):
     args = parse_args(args)
     setup_logging(args.loglevel)
     _logger.info("Reconfiguring DNS for this machine")
-    reconfigure_bind9()
+    reconfigure_bind9(args.dns_jail)
     _logger.info("Script ends here")
 
 
