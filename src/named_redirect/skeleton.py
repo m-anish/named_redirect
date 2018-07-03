@@ -45,13 +45,12 @@ def check_internet():
     response = 1
     try:
         #urllib.request.urlopen('http://216.58.192.142', timeout=5)
-        response = os.system("ping -c 1 8.8.8.8")
-        if response == 0:
-            return True
+        if not os.system("ping -c 1 8.8.8.8"):
             _logger.debug("Internet connectivity present!")
+            return True
         else:
-            return False
             _logger.debug("Internet connectivity absent!")
+            return False
     except OSError as err: 
         _logger.error("An error occurred while trying to determine internet connectivity!")
         return False
@@ -73,7 +72,7 @@ def restart_bind9():
     _logger.debug("Restarted bind9 service")
     return True
         
-def reconfigure_bind9(dns_jail_enabled=False):
+def reconfigure_bind9(dns_jail_enabled=True):
     """Reconfigure bind9 to serve as a DNS jail or not depending on argument provided. 
    
     Args:
@@ -90,13 +89,13 @@ def reconfigure_bind9(dns_jail_enabled=False):
     
     try:
         if check_internet() or not dns_jail_enabled:
-            _logger.info("We have internet, so dns_jail is not required")
             dns_jail_zone_file = "/var/named-iiab/named.blackhole.empty"
             bind9_conf_file = "/etc/named-iiab.conf.nojail"
+            _logger.info("DNS jail will not be enabled")
         else:
-            _logger.info("We do not have internet, so dns_jail is required")
             dns_jail_zone_file = "/var/named-iiab/named.blackhole.dnsjail"
             bind9_conf_file = "/etc/named-iiab.conf.jail"
+            _logger.info("DNS jail will be enabled")
     except:
         _logger.error("Could not reconfigure bind9")
         return False
